@@ -1,0 +1,61 @@
+name: Build unsigned iOS IPA
+
+# Builds CameraAccess (VisionClaw) without code signing and uploads a .ipa
+# that AltStore/Sideloadly can re-sign with a personal Apple ID.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      # Secrets.swift is gitignored; the app reads keys from its own Settings
+      # screen at runtime, so a placeholder copy is enough to compile.
+      - name: Create Secrets.swift placeholder
+        working-directory: samples/CameraAccess
+        run: cp CameraAccess/Secrets.swift.example CameraAccess/Secrets.swift
+
+      - name: Resolve Swift packages
+        working-directory: samples/CameraAccess
+        run: xcodebuild -resolvePackageDependencies -project CameraAccess.xcodeproj
+
+      - name: Build unsigned
+        working-directory: samples/CameraAccess
+        run: |
+          xcodebuild \
+            -project CameraAccess.xcodeproj \
+            -scheme CameraAccess \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            ENABLE_BITCODE=NO \
+            build
+
+      # An .ipa is just a zip with the .app inside a Payload/ directory.
+      - name: Package IPA
+        working-directory: samples/CameraAccess
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/CameraAccess.app Payload/
+          zip -qry VisionClaw-unsigned.ipa Payload
+          ls -lh VisionClaw-unsigned.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VisionClaw-unsigned-ipa
+          path: samples/CameraAccess/VisionClaw-unsigned.ipa
+          retention-days: 30

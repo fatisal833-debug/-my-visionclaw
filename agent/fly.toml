@@ -15,7 +15,7 @@ primary_region = 'sjc'
   dockerfile = 'Dockerfile'
 
 [env]
-  GEMINI_MODEL = 'gemini-2.5-flash-native-audio-preview-12-2025'
+  GEMINI_MODEL = 'gemini-3.1-flash-live-preview'
   OPENAI_REALTIME_MODEL = 'gpt-realtime-2.1'
 
 # No [[services]] section at all: the worker has no inbound port, it dials OUT

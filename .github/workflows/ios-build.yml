@@ -15,8 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+      # Use whatever Xcode the runner image ships as default, but print the
+      # environment first so build failures can be diagnosed from the log.
+      - name: Show build environment
+        run: |
+          xcodebuild -version
+          ls /Applications | grep -i xcode || true
+          xcodebuild -list -project samples/CameraAccess/CameraAccess.xcodeproj || true
 
       # Secrets.swift is gitignored; the app reads keys from its own Settings
       # screen at runtime, so a placeholder copy is enough to compile.

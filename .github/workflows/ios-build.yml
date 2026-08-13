@@ -45,7 +45,7 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM="" \
+            DEVELOPMENT_TEAM="C8U2GV538J" \
             PROVISIONING_PROFILE_SPECIFIER="" \
             ENABLE_BITCODE=NO \
             build
